@@ -60,6 +60,10 @@ public class flappybird extends ApplicationAdapter {
 
 	BitmapFont font;
 
+	Texture gameOver;
+
+
+
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
@@ -77,10 +81,18 @@ public class flappybird extends ApplicationAdapter {
 		font = new BitmapFont();
 		font.setColor(Color.WHITE);
 		font.getData().setScale(10);
+		gameOver = new Texture("gameover.png");
+
 
 		birds = new Texture[2];
 		birds[0] = new Texture("bird.png");
 		birds[1] = new Texture("bird2.png");
+
+		startGame();
+
+	}
+
+	public void startGame (){
 		birdY = Gdx.graphics.getHeight()/2 - birds[flapState].getHeight() / 2;
 
 		for (int i = 0; i < numberOfTubes; i++){
@@ -99,7 +111,7 @@ public class flappybird extends ApplicationAdapter {
 		batch.begin();
 		batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-		if(gameState != 0 ) {
+		if(gameState == 1 ) {
 			if (tubeX[scoringTube] < Gdx.graphics.getWidth() / 2){
 				score++;
 				Gdx.app.log("score", String.valueOf(score));
@@ -134,13 +146,26 @@ public class flappybird extends ApplicationAdapter {
 				bottomTubeRectangles[i] = new Rectangle(tubeX[i], Gdx.graphics.getHeight() / 2 - gap / 2 - bottomtube.getHeight() + tubeOffset[i] , bottomtube.getWidth(), bottomtube.getHeight());
 
 			}
-			if (birdY > 0 || velocity < 0){
+			if (birdY > 0 ){
 				velocity += gravity;
 				birdY -= velocity;
+			}else{
+				gameState = 2;
 			}
-		}else{
+		}else if (gameState == 0){
 			if (Gdx.input.justTouched()){
 				gameState = 1;
+			}
+		}else if (gameState == 2){
+			batch.draw(gameOver, Gdx.graphics.getWidth() / 2 - gameOver.getWidth() / 2, Gdx.graphics.getHeight() / 2 - gameOver.getHeight() / 2);
+
+			if (Gdx.input.justTouched()){
+				gameState = 1;
+				startGame();
+				score = 0;
+				scoringTube = 0;
+				velocity = 0;
+
 			}
 		}
 		if (flapState == 0) {
@@ -151,8 +176,6 @@ public class flappybird extends ApplicationAdapter {
 		batch.draw(birds[flapState], Gdx.graphics.getWidth() / 2 - birds[flapState].getWidth() / 2, birdY);
 
 		font.draw(batch, String.valueOf(score), 100,200);
-
-		batch.end();
 
 		birdCircle.set(Gdx.graphics.getWidth() / 2, birdY + birds[flapState].getHeight() / 2, birds[flapState].getWidth() / 2);
 
@@ -167,10 +190,11 @@ public class flappybird extends ApplicationAdapter {
 //			shapeRenderer.rect(tubeX[i], Gdx.graphics.getHeight() / 2 - gap / 2 - bottomtube.getHeight() + tubeOffset[i] , bottomtube.getWidth(), bottomtube.getHeight());
 
 			if (Intersector.overlaps(birdCircle, topTubeRectangles[i]) || Intersector.overlaps(birdCircle, bottomTubeRectangles[i])){
-					Gdx.app.log("collision", "yesss");
+					gameState = 2; //game is over
 			}
 
 		}
+		batch.end();
 
 //		shapeRenderer.end();
 	}
@@ -182,5 +206,6 @@ public class flappybird extends ApplicationAdapter {
 		birds[flapState].dispose();
 		toptube.dispose();
 		bottomtube.dispose();
+		gameOver.dispose();
 	}
 }
