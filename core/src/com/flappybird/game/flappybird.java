@@ -16,8 +16,11 @@ import java.util.Random;
 
 public class flappybird extends ApplicationAdapter {
 	SpriteBatch batch;
+
 	Texture background;
+
 	Texture[] birds;
+
 	Texture toptube, bottomtube;
 
 	int flapState = 0;
